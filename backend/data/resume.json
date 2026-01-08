@@ -1,0 +1,154 @@
+{
+  "personal_info": {
+    "name": "Alex Johnson",
+    "email": "alex.johnson@email.com",
+    "phone": "+1-555-123-4567",
+    "location": "San Francisco, CA",
+    "linkedin": "linkedin.com/in/alexjohnson",
+    "github": "github.com/alexjohnson",
+    "portfolio": "alexjohnson.dev"
+  },
+  "summary": "Full-stack software engineer with 5 years of experience building scalable web applications. Expertise in modern JavaScript frameworks, cloud architecture, and agile development. Passionate about clean code and mentoring junior developers.",
+  "experience": [
+    {
+      "title": "Senior Software Engineer",
+      "company": "TechCorp Inc",
+      "location": "San Francisco, CA",
+      "start_date": "2021-06",
+      "end_date": "Present",
+      "description": [
+        "Led development of microservices architecture using Node.js and Express",
+        "Implemented real-time data processing with WebSocket and Redis",
+        "Mentored 3 junior developers and conducted code reviews",
+        "Reduced API response time by 40% through optimization",
+        "Deployed and managed applications on AWS and GCP"
+      ]
+    },
+    {
+      "title": "Full Stack Developer",
+      "company": "WebSolutions Ltd",
+      "location": "Remote",
+      "start_date": "2019-03",
+      "end_date": "2021-05",
+      "description": [
+        "Developed React-based frontend applications with TypeScript",
+        "Built RESTful APIs using Node.js and Express",
+        "Designed PostgreSQL databases with complex relationships",
+        "Implemented CI/CD pipelines using Jenkins and GitHub Actions",
+        "Collaborated with product and design teams in agile environment"
+      ]
+    },
+    {
+      "title": "Junior Web Developer",
+      "company": "StartupHub",
+      "location": "New York, NY",
+      "start_date": "2018-01",
+      "end_date": "2019-02",
+      "description": [
+        "Built responsive web interfaces using HTML, CSS, and JavaScript",
+        "Contributed to backend development with Python Flask",
+        "Participated in sprint planning and daily standups",
+        "Fixed bugs and improved code quality"
+      ]
+    }
+  ],
+  "education": [
+    {
+      "degree": "Bachelor of Science in Computer Science",
+      "institution": "University of California",
+      "location": "Berkeley, CA",
+      "graduation_date": "2017-05",
+      "gpa": "3.8"
+    },
+    {
+      "degree": "AWS Certified Solutions Architect",
+      "institution": "Amazon Web Services",
+      "location": "Online",
+      "graduation_date": "2022-03",
+      "gpa": ""
+    }
+  ],
+  "skills": {
+    "technical": [
+      "JavaScript",
+      "TypeScript",
+      "React",
+      "Node.js",
+      "Express",
+      "Python",
+      "PostgreSQL",
+      "MongoDB",
+      "AWS",
+      "Docker",
+      "Kubernetes",
+      "Redis",
+      "GraphQL",
+      "REST API",
+      "HTML",
+      "CSS",
+      "Git"
+    ],
+    "soft": [
+      "Leadership",
+      "Problem Solving",
+      "Communication",
+      "Team Collaboration",
+      "Project Management",
+      "Mentoring",
+      "Adaptability",
+      "Critical Thinking"
+    ],
+    "languages": [
+      "English",
+      "Spanish"
+    ]
+  },
+  "projects": [
+    {
+      "name": "Real-time Analytics Dashboard",
+      "description": "Built a comprehensive dashboard for real-time data visualization and analytics",
+      "technologies": [
+        "React",
+        "Node.js",
+        "WebSocket",
+        "PostgreSQL",
+        "D3.js"
+      ],
+      "link": "github.com/alexjohnson/analytics-dashboard"
+    },
+    {
+      "name": "Microservices E-commerce Platform",
+      "description": "Designed and implemented scalable microservices architecture for e-commerce",
+      "technologies": [
+        "Node.js",
+        "Docker",
+        "Kubernetes",
+        "MongoDB",
+        "RabbitMQ"
+      ],
+      "link": "github.com/alexjohnson/ecommerce-platform"
+    },
+    {
+      "name": "AI-Powered Content Generator",
+      "description": "Created tool for generating content using machine learning models",
+      "technologies": [
+        "Python",
+        "FastAPI",
+        "TensorFlow",
+        "React",
+        "PostgreSQL"
+      ],
+      "link": "github.com/alexjohnson/ai-content-gen"
+    }
+  ],
+  "certifications": [
+    "AWS Certified Solutions Architect Professional",
+    "Google Cloud Associate Cloud Engineer",
+    "Certified Kubernetes Administrator (CKA)"
+  ],
+  "awards": [
+    "Best Engineer Award - TechCorp Inc (2023)",
+    "Innovation Challenge Winner (2022)",
+    "Open Source Contributor of the Year (2021)"
+  ]
+}

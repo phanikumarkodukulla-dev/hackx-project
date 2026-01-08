@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AI Resume Parser</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  </head>
+  <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div id="app" class="p-6">
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-white p-8 rounded-2xl shadow-xl">
+          <div class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-gray-800 mb-2">
+              AI Resume Parser
+            </h1>
+            <p class="text-gray-600">
+              Upload your resume and let AI extract structured data
+            </p>
+          </div>
+
+          <!-- Error Alert -->
+          <div
+            id="errorAlert"
+            class="hidden bg-red-50 border border-red-200 text-red-700 p-4 rounded-lg mb-6"
+          >
+            <span id="errorText"></span>
+          </div>
+
+          <!-- Loading Message -->
+          <div
+            id="loadingAlert"
+            class="hidden bg-blue-50 border border-blue-200 text-blue-700 p-4 rounded-lg mb-6"
+          >
+            <span id="loadingText"></span>
+          </div>
+
+          <!-- Progress Steps -->
+          <div class="mb-8">
+            <div class="flex justify-between mb-2">
+              <div class="step-item flex flex-col items-center" data-step="1">
+                <div
+                  class="w-10 h-10 rounded-full flex items-center justify-center font-bold mb-1 step-circle"
+                >
+                  1
+                </div>
+                <span class="text-xs font-medium">Upload</span>
+              </div>
+              <div class="step-item flex flex-col items-center" data-step="2">
+                <div
+                  class="w-10 h-10 rounded-full flex items-center justify-center font-bold mb-1 step-circle"
+                >
+                  2
+                </div>
+                <span class="text-xs font-medium">Extract</span>
+              </div>
+              <div class="step-item flex flex-col items-center" data-step="3">
+                <div
+                  class="w-10 h-10 rounded-full flex items-center justify-center font-bold mb-1 step-circle"
+                >
+                  3
+                </div>
+                <span class="text-xs font-medium">Review</span>
+              </div>
+              <div class="step-item flex flex-col items-center" data-step="4">
+                <div
+                  class="w-10 h-10 rounded-full flex items-center justify-center font-bold mb-1 step-circle"
+                >
+                  4
+                </div>
+                <span class="text-xs font-medium">Parse</span>
+              </div>
+              <div class="step-item flex flex-col items-center" data-step="5">
+                <div
+                  class="w-10 h-10 rounded-full flex items-center justify-center font-bold mb-1 step-circle"
+                >
+                  5
+                </div>
+                <span class="text-xs font-medium">Results</span>
+              </div>
+            </div>
+            <div class="relative h-2 bg-gray-200 rounded-full">
+              <div
+                id="progressBar"
+                class="absolute h-2 bg-indigo-600 rounded-full transition-all duration-500"
+                style="width: 0%"
+              ></div>
+            </div>
+          </div>
+
+          <!-- File Upload -->
+          <div class="mb-6" id="uploadSection">
+            <label class="block text-sm font-medium text-gray-700 mb-2"
+              >Upload Resume (PDF or Image)</label
+            >
+            <input
+              type="file"
+              id="fileInput"
+              accept=".pdf,image/*"
+              class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 cursor-pointer"
+            />
+            <div id="fileInfo" class="hidden mt-2 text-sm text-gray-600"></div>
+          </div>
+
+          <!-- Extract Button -->
+          <button
+            id="extractBtn"
+            class="hidden w-full bg-indigo-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+          >
+            Extract Text from File
+          </button>
+
+          <!-- Extracted Text Preview -->
+          <div id="textPreview" class="hidden mb-6">
+            <h3 class="text-lg font-semibold mb-3">✓ Extracted Text Preview</h3>
+            <div
+              class="bg-gray-50 p-4 rounded-lg border border-gray-200 max-h-60 overflow-y-auto"
+            >
+              <pre
+                id="extractedText"
+                class="text-sm text-gray-700 whitespace-pre-wrap"
+              ></pre>
+            </div>
+            <p id="charCount" class="text-sm text-gray-500 mt-2"></p>
+          </div>
+
+          <!-- Parse Button -->
+          <button
+            id="parseBtn"
+            class="hidden w-full bg-green-600 text-white py-3 px-6 rounded-lg font-semibold hover:bg-green-700 transition-colors"
+          >
+            Parse with AI
+          </button>
+
+          <!-- Results -->
+          <div id="results" class="hidden mt-6">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold text-green-600">
+                ✓ Parsed Resume Data
+              </h3>
+              <button
+                id="resetBtn"
+                class="text-sm text-indigo-600 hover:text-indigo-700 font-medium"
+              >
+                Parse Another
+              </button>
+            </div>
+            <div class="bg-gray-50 p-6 rounded-lg border border-gray-200">
+              <pre
+                id="parsedData"
+                class="text-sm text-gray-800 overflow-x-auto whitespace-pre-wrap"
+              ></pre>
+            </div>
+            <div class="mt-4 flex gap-2">
+              <button
+                id="downloadJson"
+                class="flex-1 bg-indigo-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-indigo-700 transition-colors"
+              >
+                Download JSON
+              </button>
+              <button
+                id="copyJson"
+                class="flex-1 bg-gray-600 text-white py-2 px-4 rounded-lg font-semibold hover:bg-gray-700 transition-colors"
+              >
+                Copy to Clipboard
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Initialize PDF.js worker
+      pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+
+      // ⚠️ IMPORTANT: Replace with your actual Gemini API key
+      const GEMINI_API_KEY = "AIzaSyBfSdpSzjFA-Rooox1zVQsQscIJrgPQ8GY";
+
+      let currentFile = null;
+      let extractedTextData = "";
+      let currentStep = 1;
+      let parsedJsonData = null;
+
+      const elements = {
+        fileInput: $("#fileInput"),
+        extractBtn: $("#extractBtn"),
+        parseBtn: $("#parseBtn"),
+        resetBtn: $("#resetBtn"),
+        downloadJson: $("#downloadJson"),
+        copyJson: $("#copyJson"),
+        errorAlert: $("#errorAlert"),
+        errorText: $("#errorText"),
+        loadingAlert: $("#loadingAlert"),
+        loadingText: $("#loadingText"),
+        fileInfo: $("#fileInfo"),
+        textPreview: $("#textPreview"),
+        extractedText: $("#extractedText"),
+        charCount: $("#charCount"),
+        results: $("#results"),
+        parsedData: $("#parsedData"),
+        progressBar: $("#progressBar"),
+      };
+
+      function updateStep(step) {
+        currentStep = step;
+        const progress = ((step - 1) / 4) * 100;
+        elements.progressBar.css("width", progress + "%");
+
+        $(".step-item").each(function () {
+          const itemStep = parseInt($(this).data("step"));
+          const circle = $(this).find(".step-circle");
+
+          if (itemStep <= step) {
+            $(this).addClass("text-indigo-600").removeClass("text-gray-400");
+            circle
+              .addClass("bg-indigo-600 text-white")
+              .removeClass("bg-gray-200");
+            circle.text(itemStep < step ? "✓" : itemStep);
+          } else {
+            $(this).addClass("text-gray-400").removeClass("text-indigo-600");
+            circle
+              .addClass("bg-gray-200")
+              .removeClass("bg-indigo-600 text-white");
+            circle.text(itemStep);
+          }
+        });
+      }
+
+      function showError(message) {
+        elements.errorText.text(message);
+        elements.errorAlert.removeClass("hidden");
+      }
+
+      function hideError() {
+        elements.errorAlert.addClass("hidden");
+      }
+
+      function showLoading(message) {
+        elements.loadingText.text(message);
+        elements.loadingAlert.removeClass("hidden");
+      }
+
+      function hideLoading() {
+        elements.loadingAlert.addClass("hidden");
+      }
+
+      elements.fileInput.on("change", function (e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const allowed = [
+          "application/pdf",
+          "image/png",
+          "image/jpeg",
+          "image/jpg",
+        ];
+        if (!allowed.includes(file.type)) {
+          showError("Please upload a PDF or Image file only");
+          return;
+        }
+
+        if (file.size > 10 * 1024 * 1024) {
+          showError("File size must be less than 10MB");
+          return;
+        }
+
+        currentFile = file;
+        hideError();
+        elements.fileInfo.text(
+          `${file.name} (${(file.size / 1024).toFixed(1)} KB)`
+        );
+        elements.fileInfo.removeClass("hidden");
+        elements.extractBtn.removeClass("hidden");
+        elements.textPreview.addClass("hidden");
+        elements.parseBtn.addClass("hidden");
+        elements.results.addClass("hidden");
+        updateStep(1);
+      });
+
+      async function extractTextFromPDF(file) {
+        showLoading("Reading PDF...");
+        const buffer = await file.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+
+        let text = "";
+        for (let i = 1; i <= pdf.numPages; i++) {
+          showLoading(`Reading page ${i} of ${pdf.numPages}...`);
+          const page = await pdf.getPage(i);
+          const content = await page.getTextContent();
+          text += content.items.map((item) => item.str).join(" ") + "\n";
+        }
+        return text;
+      }
+
+      async function extractTextFromImage(file) {
+        showLoading("Processing image with OCR...");
+        const result = await Tesseract.recognize(file, "eng", {
+          logger: (m) => {
+            if (m.status === "recognizing text") {
+              showLoading(`OCR Progress: ${Math.round(m.progress * 100)}%`);
+            }
+          },
+        });
+        return result.data.text;
+      }
+
+      elements.extractBtn.on("click", async function () {
+        if (!currentFile) return;
+
+        elements.extractBtn.prop("disabled", true).text("Extracting...");
+        hideError();
+        updateStep(2);
+
+        try {
+          let text =
+            currentFile.type === "application/pdf"
+              ? await extractTextFromPDF(currentFile)
+              : await extractTextFromImage(currentFile);
+
+          if (!text || text.trim().length < 10) {
+            showError("Could not extract meaningful text from file");
+            updateStep(1);
+            return;
+          }
+
+          extractedTextData = text;
+          elements.extractedText.text(
+            text.slice(0, 1000) + (text.length > 1000 ? "..." : "")
+          );
+          elements.charCount.text(`${text.length} characters extracted`);
+          elements.textPreview.removeClass("hidden");
+          elements.parseBtn.removeClass("hidden");
+          elements.extractBtn.addClass("hidden");
+          updateStep(3);
+          hideLoading();
+        } catch (error) {
+          console.error("Extraction error:", error);
+          showError(`Extraction failed: ${error.message}`);
+          updateStep(1);
+        } finally {
+          elements.extractBtn
+            .prop("disabled", false)
+            .text("Extract Text from File");
+        }
+      });
+
+      async function parseWithGemini(text) {
+        const prompt = `You are a resume parser AI. Extract structured information from the following resume text and return ONLY a valid JSON object with this exact structure:
+
+{
+  "personal_info": {
+    "name": "",
+    "email": "",
+    "phone": "",
+    "location": "",
+    "linkedin": "",
+    "github": "",
+    "portfolio": ""
+  },
+  "summary": "",
+  "experience": [
+    {
+      "title": "",
+      "company": "",
+      "location": "",
+      "start_date": "",
+      "end_date": "",
+      "description": []
+    }
+  ],
+  "education": [
+    {
+      "degree": "",
+      "institution": "",
+      "location": "",
+      "graduation_date": "",
+      "gpa": ""
+    }
+  ],
+  "skills": {
+    "technical": [],
+    "soft": [],
+    "languages": []
+  },
+  "projects": [
+    {
+      "name": "",
+      "description": "",
+      "technologies": [],
+      "link": ""
+    }
+  ],
+  "certifications": [],
+  "awards": []
+}
+
+Resume Text:
+${text}
+
+Return ONLY the JSON object, no markdown formatting, no explanations.`;
+
+        const response = await $.ajax({
+          url: `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+          method: "POST",
+          contentType: "application/json",
+          data: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: prompt,
+                  },
+                ],
+              },
+            ],
+            generationConfig: {
+              temperature: 0.2,
+              topK: 40,
+              topP: 0.95,
+              maxOutputTokens: 8192,
+            },
+          }),
+        });
+
+        if (
+          response.candidates &&
+          response.candidates[0]?.content?.parts?.[0]?.text
+        ) {
+          let jsonText = response.candidates[0].content.parts[0].text;
+          jsonText = jsonText
+            .replace(/```json\n?/g, "")
+            .replace(/```\n?/g, "")
+            .trim();
+          return JSON.parse(jsonText);
+        } else {
+          throw new Error("Invalid response from Gemini API");
+        }
+      }
+
+      elements.parseBtn.on("click", async function () {
+        if (!GEMINI_API_KEY || GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+          showError("Please add your Gemini API key in the JavaScript code");
+          return;
+        }
+
+        elements.parseBtn.prop("disabled", true).text("Parsing with AI...");
+        hideError();
+        updateStep(4);
+        showLoading("Sending to Gemini AI for parsing...");
+
+        try {
+          const parsedData = await parseWithGemini(extractedTextData);
+          parsedJsonData = parsedData;
+          elements.parsedData.text(JSON.stringify(parsedData, null, 2));
+          elements.results.removeClass("hidden");
+          elements.parseBtn.addClass("hidden");
+          updateStep(5);
+          hideLoading();
+        } catch (error) {
+          console.error("AI parsing error:", error);
+          showError(
+            `AI parsing failed: ${error.message}. Please check your API key and try again.`
+          );
+          updateStep(3);
+        } finally {
+          elements.parseBtn.prop("disabled", false).text("Parse with AI");
+        }
+      });
+
+      elements.downloadJson.on("click", function () {
+        if (!parsedJsonData) return;
+
+        const dataStr = JSON.stringify(parsedJsonData, null, 2);
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "parsed_resume.json";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      elements.copyJson.on("click", function () {
+        if (!parsedJsonData) return;
+
+        const dataStr = JSON.stringify(parsedJsonData, null, 2);
+        navigator.clipboard.writeText(dataStr).then(() => {
+          const originalText = elements.copyJson.text();
+          elements.copyJson.text("✓ Copied!");
+          setTimeout(() => {
+            elements.copyJson.text(originalText);
+          }, 2000);
+        });
+      });
+
+      elements.resetBtn.on("click", function () {
+        currentFile = null;
+        extractedTextData = "";
+        parsedJsonData = null;
+        elements.fileInput.val("");
+        elements.fileInfo.addClass("hidden");
+        elements.extractBtn.addClass("hidden");
+        elements.textPreview.addClass("hidden");
+        elements.parseBtn.addClass("hidden");
+        elements.results.addClass("hidden");
+        hideError();
+        hideLoading();
+        updateStep(1);
+      });
+
+      updateStep(1);
+    </script>
+  </body>
+</html>
